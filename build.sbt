@@ -1,12 +1,12 @@
 scalaVersion := "2.13.1"
 
 lazy val ver = new {
-  val mongo = "3.4.3"
+  val mongo = "3.12.1"
   val monix = "3.1.0"
   val scalatest = "3.0.8"
   val logback = "1.2.3"
   val scalaLogging = "3.9.2"
-  val config = "1.3.1"
+  val config = "1.4.0"
 }
 
 lazy val monix = Seq(

@@ -1,16 +1,19 @@
 package com.hibiup.mongo
 
+import java.util.function.BiConsumer
+
 import cats.effect.{ExitCode, IO, IOApp, Resource}
 import com.typesafe.config.ConfigFactory
 import monix.eval.Task
-import com.mongodb.{MongoClientURI, MongoClient}
+import com.mongodb.{MongoClient, MongoClientURI}
 import monix.execution.Scheduler.Implicits.global
 
 object MainEntry extends IOApp{
   override def run(args: List[String]): IO[ExitCode] = IO {
     mongodb.use {
-      db => {
-        Task(println(db.getName))
+      db => Task{
+        println(db.getCollection("test").find().first())
+        println(db.getName)
       }
     }.guarantee(Task(println("Application stopped"))).map(_ => ExitCode.Success).runSyncUnsafe()
   }
@@ -18,7 +21,7 @@ object MainEntry extends IOApp{
   def mongodb = for {
       conf <- Resource.make {
         Task(ConfigFactory.load())
-      } { _ => Task() }
+      } { _ => Task(()) }
 
       mongo <- Resource.make{
         Task{
@@ -26,5 +29,7 @@ object MainEntry extends IOApp{
           new MongoClient(connectionURI)
         }
       }{ client => Task(client.close()) }
-    } yield mongo.getDatabase(conf.getString("mongodb.database"))
+    } yield {
+      mongo.getDatabase(conf.getString("mongodb.database"))
+    }
 }
